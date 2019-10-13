@@ -1,0 +1,176 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.2.4
+  kernelspec:
+    display_name: R
+    language: R
+    name: ir
+---
+
+# R by Example
+
+Alex Chi
+
+## Exercises
+
+```
+1.1 (Normal percentiles). The qnorm function returns the percentiles (quantiles) of a normal distribution. Use the qnorm function to find the 95th percentile of the standard normal distribution. Then, use the qnorm function to find the quartiles of the standard normal distribution (the quartiles are the 25th, 50th, and 75thpercentiles). Hint: Use c(.25, .5, .75) as the first argument to qnorm.
+```
+
+```{r}
+qnorm(.95)
+```
+
+```{r}
+qnorm(c(.25, .5, .75))
+```
+
+```
+1.2 (Chi-square density curve). Use the curve function to display the graph of the χ2(1) density. The chi-square density function is dchisq.
+```
+
+```{r}
+curve(dchisq(x, df = 1), 0, 1)
+```
+
+```
+1.3 (Gamma densities). Use the curve function to display the graph of the gamma density with shape parameter 1 and rate parameter 1. Then use the curve function with add=TRUE to display the graphs of the gamma density with shape parameter k and rate 1 for 2,3, all in the same graphics window.
+The gamma density function is dgamma. Consult the help file ?dgamma to see how to specify the parameters.
+    ```
+
+```{r}
+curve(dgamma(x, 1, 1))
+curve(dgamma(x, 1, 2), add=TRUE)
+curve(dgamma(x, 1, 3), add=TRUE)
+```
+
+```
+1.4 (Binomial probabilities). Let X be the number of “ones” obtained in 12 rolls of a fair die. Then X has a Binomial(n = 12,p = 1/3) distribution.
+Compute a table of binomial probabilities for x = 0,1,...,12 by two methods:
+a. Use the probability density formula and vectorized arithmetic in R. Use 0:12 for the sequence of x values and the choose function to compute the binomial coefficients (n k).
+b. Use the dbinom function provided in R and compare your results using both methods.
+```
+
+```{r}
+k = 0:12
+n = 12
+p = 1/3
+P_x1 = choose(n,k)*p^x*(1-p)^(n-k)
+P_x2 = dbinom(k,n,p)
+plot(k, P_x1)
+plot(k, P_x2)
+```
+
+```
+1.5 (Binomial CDF). Let X be the number of “ones” obtained in 12 rolls of a fair die. Then X has a Binomial(n = 12,p = 1/3) distribution. Compute a table of cumulative binomial probabilities (the CDF) for x = 0,1,...,12 by two methods: (1) using cumsum and the result of Exercise 1.4, and (2) using the pbinom function. What is P(X > 7)
+```
+
+```{r}
+cumsum(P_x1)
+```
+
+```{r}
+pbinom(k,n,p)
+```
+
+```{r}
+1 - pbinom(k,n,p)[7]
+```
+
+```
+1.6 (Presidents’ heights). Refer to Example 1.2 where the heights of the United States Presidents are compared with their main opponent in the pres- idential election. Create a scatterplot of the loser’s height vs the winner’s height using the plot function. Compare the plot to the more detailed plot shown in the Wikipedia article “Heights of Presidents of the United States and presidential candidates
+```
+
+```{r}
+winner = c(185, 182, 182, 188, 188, 188, 185, 185, 177, 182, 182, 193, 183, 179, 179, 175)
+opponent = c(175, 193, 185, 187, 188, 173, 180, 177, 183, 185, 180, 180, 182, 178, 178, 173)
+
+plot(winner, opponent)
+```
+
+```
+1.7 (Simulated“horsekicks”data). The rpois function generates random observations from a Poisson distribution. In Example 1.3, we compared the deaths due to horsekicks to a Poisson distribution with mean λ = 0.61, and in Example 1.4 we simulated random Poisson(λ = 0.61) data. Use the rpois function to simulate very large (n = 1000 and n = 10000) Poisson(λ = 0.61) random samples. Find the frequency distribution, mean and variance for the sample. Compare the theoretical Poisson density with the sample proportions (see Example 1.4).
+```
+
+```{r}
+x = rpois(1000, 0.61)
+xx = table(x)
+cat("Mean = ", mean(x), "\n")
+cat("Var = ", var(x))
+xx / 1000
+```
+
+```{r}
+theoretical = dpois(0:5, lambda=.61)
+sample = xx / 1000
+cbind(theoretical, sample)
+```
+
+```
+1.8 (horsekicks, continued). Refer to Example 1.3. Using the ppois function, compute the cumulative distribution function (CDF) for the Poisson distribution with mean λ = 0.61, for the values 0 to 4. Compare these proba- bilities with the empirical CDF. The empirical CDF is the cumulative sum of the sample proportions p, which is easily computed using the cumsum func- tion. Combine the values of 0:4, the CDF, and the empirical CDF in a matrix to display these results in a single table.
+```
+
+```{r}
+theoretical = ppois(0:5, 0.61)
+sample = cumsum(xx / 1000)
+cbind(theoretical, sample)
+```
+
+```
+1.10 (Euclidean norm function). Write a function norm that will compute the Euclidean norm of a numeric vector. The Euclidean norm of a vector x = (x1,...,xn) is
+
+Use vectorized operations to compute the sum. Try this function on the vec- tors (0,0,0,1) and (2,5,2,4) to check that your function result is correct.
+```
+
+```{r}
+norm = function(x) { sqrt((x %*% x)[1][1]) }
+print(norm(c(0,0,0,1)))
+print(norm(c(2,5,2,4)))
+```
+
+```
+1.11 (Numerical integration). Use the curve function to display the graph of the function f(x) = e−x2/(1+x2) on the interval 0 ≤ x ≤ 10. Then use the integrate function to compute the value of the integral ???
+The upper limit at infinity is specified by upper=Inf in the integrate func- tion.
+```
+
+```{r}
+f = function(x) exp(-x^2) / (1 + x^2)
+curve(f, 0, 10)
+integrate(f, 0, Inf)
+```
+
+```
+1.12 (Bivariate normal). Construct a matrix with 10 rows and 2 columns, containing random standard normal data:
+```
+
+```{r}
+x = matrix(rnorm(20), 10, 2)
+x
+```
+
+```{r}
+norm_x = apply(x, c(1), norm)
+id = 1:length(norm_x)
+cbind(id, norm_x)
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
