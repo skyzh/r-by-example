@@ -16,6 +16,8 @@ jupyter:
 
 Alex Chi
 
+## Chapter 1
+
 ## Exercises
 
 ```
@@ -41,7 +43,7 @@ curve(dchisq(x, df = 1), 0, 1)
 ```
 1.3 (Gamma densities). Use the curve function to display the graph of the gamma density with shape parameter 1 and rate parameter 1. Then use the curve function with add=TRUE to display the graphs of the gamma density with shape parameter k and rate 1 for 2,3, all in the same graphics window.
 The gamma density function is dgamma. Consult the help file ?dgamma to see how to specify the parameters.
-    ```
+```
 
 ```{r}
 curve(dgamma(x, 1, 1))
@@ -159,18 +161,30 @@ id = 1:length(norm_x)
 cbind(id, norm_x)
 ```
 
-```{r}
-
+```
+1.14 (Tearing factor of paper). The following data describe the tearing factor of paper manufactured under different pressures during pressing. The data is given in Hand et al. [21, Page 4]. Four sheets of paper were selected and tested from each of the five batches manufactured.
 ```
 
 ```{r}
+tearing_factor = read.csv("tear_factor.csv", header=TRUE)
+tearing_factor
+```
 
+```
+1.15 (Vectorized operations). We have seen two examples of vectorized arithmetic in Example 1.1. In the conversion to Celsius, the operations in- volved one vector temps of length four and scalars (32 and 5/9). When we computed differences, the operation involved two vectors temps and CT of length four. In both cases, the arithmetic operations were applied element by element. What would happen if two vectors of different lengths appear together in an arithmetic expression? Try the following examples using the colon operator : to generate a sequence of consecutive integers.
 ```
 
 ```{r}
-
+x = 1:8
+n = 1:2
+x + n
 ```
 
 ```{r}
+n = 1:3
+x + n
+```
 
+```
+Answer: n 在 1 2 之间循环。
 ```
