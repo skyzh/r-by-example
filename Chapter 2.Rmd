@@ -16,6 +16,11 @@ jupyter:
 
 Alex Chi
 
+```{r}
+library(repr)
+options(repr.plot.width=9, repr.plot.height=7)
+```
+
 ## Chapter 2
 
 ## Exercises
@@ -31,22 +36,19 @@ boxplot(weight ~ feed, data = chickwts, col = "lightgray",
 2.2 (iris data). The iris data gives the measurements in centimeters of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of three species of iris. There are four numeric variables corresponding to the sepal and petal measurements and one factor, Species.
 Display a table of means by Species (means should be computed separately for each of the three Species).
 
+Note: 在新版 R 语言中，`mean` 不能用于 Dataframe。经过 Google & StackOverflow 查询，发现需要用 `colMeans` 函数替代。
+
 ```{r}
 by(data=iris[1:4], INDICES=iris$Species, FUN=colMeans)
 ```
 
-<!-- #region -->
-在新版 R 语言中，`mean` 不能用于 Dataframe。经过 Google & StackOverflow 查询，发现需要用 `colMeans` 函数替代。
-
-
 2.3 (mtcars data). Display the mtcars data included with R and read the documentation using ?mtcars. Display parallel boxplots of the quantitative variables. Display a pairs plot of the quantitative variables. Does the pairs plot reveal any possible relations between the variables
-<!-- #endregion -->
+
+Answer: mpg 和 disp 似乎有反比关系？
 
 ```{r}
 pairs(mtcars, main = "mtcars data", gap = 1/4)
 ```
-
-Answer: mpg 和 disp 似乎有反比关系？
 
 2.4 (mammals data). Refer to Example 2.7. Create a new variable r equal to the ratio of brain size over body size. Using the full mammals data set, order the mammals data by the ratio r. Which mammals have the largest ratios of brain size to body size? Which mammals have the smallest ratios? (Hint: use head and tail on the ordered data.)
 
@@ -100,6 +102,31 @@ truehist(means, prob=TRUE)
 curve(dnorm(x, 1/2, sd=sqrt(1/12/10)), add=TRUE)
 ```
 
-```{r}
+2.10 (“Old Faithful” histogram). Use hist to display a probability his- togram of the waiting times for the Old Faithful geyser in the faithful data set (see Example A.3). (Use the argument prob=TRUE or freq=FALSE.)
 
+```{r}
+hist(faithful$waiting, prob=TRUE)
+```
+
+```{r}
+hist(faithful$waiting, prob=TRUE)
+lines(density(faithful$waiting))
+```
+
+2.12 (Ordering the mammals data by brain size). Refer to Example 2.1. Using the full mammals data set, order the data by brain size. Which mammals have the largest brain sizes? Which mammals have the smallest brain sizes?
+
+```{r}
+o = order(mammals$brain)
+sorted_mammals = mammals[o, ]
+head(sorted_mammals, 1)
+tail(sorted_mammals, 1)
+```
+
+2.14 (mammals cluster analysis). Refer to Example 2.10. Repeat the cluster analysis using Ward’s minimum variance method instead of near- est neighbor (complete) linkage. Ward’s method is implemented in hclust with method="ward" when the first argument is the squared distance matrix.
+Display a dendrogram and compare the result with the dendrogram for the nearest neighbor method.
+
+```{r}
+d = dist(log(mammals))
+h = hclust(d, method="ward.D")
+plot(h)
 ```
