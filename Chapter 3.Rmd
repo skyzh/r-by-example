@@ -1,0 +1,134 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.2.4
+  kernelspec:
+    display_name: R
+    language: R
+    name: ir
+---
+
+# R by Example
+
+Alex Chi
+
+```{r}
+library(repr)
+options(repr.plot.width=10, repr.plot.height=8)
+```
+
+## Chapter 3 Exercises
+
+## 3.1 (Fast food eating preference).
+
+Fifteen students in a statistics class were asked to state their preference among the three restaurtants Wendys, McDonalds, and Subway. The responses for the students are presented below.
+
+```
+Wendys McDonalds Subway Subway Subway Wendys 
+Wendys Subway Wendys Subway Subway Subway
+Subway Subway Subway
+```
+a. Use the scan function to read these data into the R command window.
+
+b. Use the table function to find the frequencies of students who prefer the three restaurants.
+
+c. Compute the proportions of students in each category.
+
+d. Construct two different graphical displays of the proportions.
+
+```{r}
+# scan cannot be used in Jupyter R, so I just construct the table
+restaurants = unlist(strsplit("Wendys McDonalds Subway Subway Subway Wendys Wendys Subway Wendys Subway Subway Subway Subway Subway Subway", split=' '))
+freq = table(factor(restaurants))
+freq
+```
+
+```{r}
+freq / length(restaurants)
+```
+
+```{r}
+barplot(prop.table(freq))
+```
+
+## 3.2 (Dice rolls)
+Suppose you roll a pair of dice 1000 times
+a. One can simulate 1000 rolls of a fair die using the R function sample(6, 1000, replace=TRUE). Using this function twice, store 1000 simulated rolls of the first die in the variable die1 and 1000 simulated rolls of the second die in the variable die2.
+
+b. For each pair of rolls, compute the sum of rolls, and store the sums in the variable die.sum.
+
+c. Use the table function to tabulate the values of the sum of die rolls. Com- pute the proportions for each sum value and compare these proportions with the exact probabilities of the sum of two die rolls
+
+```{r}
+die1 = sample(6, 1000, replace=TRUE)
+die2 = sample(6, 1000, replace=TRUE)
+die.sum = die1 + die2
+table(die.sum) / length(die.sum)
+```
+
+```{r}
+k = 2:12
+die.expected = (6 - abs(k - (6 + 1))) / (6 * 6)
+die.freq = table(die.sum) / length(die.sum)
+plot(k, die.freq, type="h", lwd=2, lty=1, ylab="Freq")
+lines(k + .2, die.expected, type="h", lwd=2, lty=2) 
+```
+
+## 3.3 (Does baseball hitting data follow a binomial distribution?)
+
+Albert Pujols is a baseball player who has n opportunities to hit in a single game. If y denotes the number of hits for a game, then it is reasonable to assume that y has a binomial distribution with sample size n and probability of success p = 0.312, where 0.312 is Pujols’ batting average (success rate) for the 2010 baseball season.
+
+a. In 70 games Pujols had exactly n = 4 opportunities to hit and the num- ber of hits y in these 70 games is tabulated in the following table. Use the dbinom function to compute the expected counts and the chisq.test function to test if the counts follow a binomial(4, 0.312) distribution.
+
+b. In 25 games Pujols had exactly n = 5 opportunities to hit and the number of hits y in these 25 games is shown in the table below. Use the chisq.test function to test if the counts follow a binomial(5, 0.312) distribution
+
+```{r}
+n = 4
+k = 0 : (n - 1)
+baseball.expected = dbinom(k, n, 0.312)
+baseball.game = c(17, 31, 17, 5)
+baseball.game = baseball.game / 70
+names(baseball.game) = k
+plot(k, baseball.game, type="h", lwd=2, lty=1, ylab="Freq")
+lines(k + .2, baseball.expected, type="h", lwd=2, lty=2) 
+```
+
+```{r}
+baseball.expected = dbinom(k, 5, 0.312)
+baseball.game = c(5, 5, 4, 11)
+chisq.test(baseball.game, p=baseball.expected)
+```
+
+## 3.4 (Categorizing ages in the twins dataset). The variable AGE gives the age (in years) of twin 1.
+a. Use the cut function on AGE with the breakpoints 30, 40, and 50 to create a categorized version of the twin’s age.
+
+b. Use the table function to find the frequencies in the four age categories.
+
+c. Construct a graph of the proportions in the four age categories
+
+```{r}
+data(twins)
+```
+
+## 3.8 (Are the digits of π random?). 
+The National Institute of Standards and Technology has a web page that lists the first 5000 digits of the irrational number π. One can read these digits into R by means of the script
+
+```{r}
+pidigits = read.table("http://www.itl.nist.gov/div898/strd/univ/data/PiDigits.dat", skip=60)
+```
+
+```{r}
+barplot(prop.table(table(pidigits)))
+```
+
+```{r}
+chisq.test(table(pidigits), punif(1:10))
+```
+
+```{r}
+
+```
