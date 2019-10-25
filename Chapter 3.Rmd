@@ -42,7 +42,11 @@ d. Construct two different graphical displays of the proportions.
 
 ```{r}
 # scan cannot be used in Jupyter R, so I just construct the table
-restaurants = unlist(strsplit("Wendys McDonalds Subway Subway Subway Wendys Wendys Subway Wendys Subway Subway Subway Subway Subway Subway", split=' '))
+restaurants = unlist(strsplit(
+    paste("Wendys McDonalds Subway Subway Subway ",
+          "Wendys Wendys Subway Wendys Subway ",
+          "Subway Subway Subway Subway Subway")
+    , split=' '))
 freq = table(factor(restaurants))
 freq
 ```
@@ -95,10 +99,14 @@ p = dbinom(k, n, 0.312)
 baseball.expected = c(p[1:3], 1-sum(p[1:3]))
 baseball.game = c(17, 31, 17, 5)
 
-plot(k, prop.table(baseball.game), type="h", lwd=2, lty=1, ylab="Freq")
-lines(k + .2, baseball.expected, type="h", lwd=2, lty=2) 
+plot(k, prop.table(baseball.game), type="h", 
+     lwd=2, lty=1, ylab="Freq")
+lines(k + .2, baseball.expected, type="h",
+      lwd=2, lty=2) 
 
-result = chisq.test(baseball.game, p=baseball.expected, simulate.p.value=TRUE)
+result = chisq.test(baseball.game, 
+                    p=baseball.expected, 
+                    simulate.p.value=TRUE)
 result
 cat("p-value = ", result$p.value, ", p-value 太小代表不服从分布")
 ```
@@ -108,10 +116,14 @@ p = dbinom(0:4, 5, 0.312)
 baseball.expected = c(p[1:3], 1 - sum(p[1:3]))
 baseball.game = c(5, 5, 4, 11)
 
-plot(k, prop.table(baseball.game), type="h", lwd=2, lty=1, ylab="Freq")
-lines(k + .2, baseball.expected, type="h", lwd=2, lty=2) 
+plot(k, prop.table(baseball.game), type="h", 
+     lwd=2, lty=1, ylab="Freq")
+lines(k + .2, baseball.expected, type="h", 
+      lwd=2, lty=2) 
 
-result = chisq.test(baseball.game, p = baseball.expected, simulate.p.value=TRUE)
+result = chisq.test(baseball.game, 
+                    p = baseball.expected, 
+                    simulate.p.value=TRUE)
 result
 cat("p-value = ", result$p.value, ", p-value 太小代表不服从分布")
 ```
@@ -128,7 +140,8 @@ c. Construct a graph of the proportions in the four age categories
 
 ```{r}
 TWINS_DATASET_URL = "http://personal.bgsu.edu/~mrizzo/Rx/Rx-data/twins.dat.txt"
-twn = read.table(TWINS_DATASET_URL, header=TRUE, na.strings=".", sep=",")
+twn = read.table(TWINS_DATASET_URL, header=TRUE, 
+                 na.strings=".", sep=",")
 ```
 
 ```{r}
