@@ -86,24 +86,40 @@ a. In 70 games Pujols had exactly n = 4 opportunities to hit and the num- ber of
 
 b. In 25 games Pujols had exactly n = 5 opportunities to hit and the number of hits y in these 25 games is shown in the table below. Use the chisq.test function to test if the counts follow a binomial(5, 0.312) distribution
 
+在这里，我在 chisq.test 中使用了 `simulate.p.value` 参数，以防止 "Chi-squared approximation may be incorrect" 的提示。
+
 ```{r}
 n = 4
 k = 0 : (n - 1)
-baseball.expected = dbinom(k, n, 0.312)
+p = dbinom(k, n, 0.312)
+baseball.expected = c(p[1:3], 1-sum(p[1:3]))
 baseball.game = c(17, 31, 17, 5)
-baseball.game = baseball.game / 70
-names(baseball.game) = k
-plot(k, baseball.game, type="h", lwd=2, lty=1, ylab="Freq")
+
+plot(k, prop.table(baseball.game), type="h", lwd=2, lty=1, ylab="Freq")
 lines(k + .2, baseball.expected, type="h", lwd=2, lty=2) 
+
+result = chisq.test(baseball.game, p=baseball.expected, simulate.p.value=TRUE)
+result
+cat("p-value = ", result$p.value, ", p-value 太小代表不服从分布")
 ```
 
 ```{r}
-baseball.expected = dbinom(k, 5, 0.312)
+p = dbinom(0:4, 5, 0.312)
+baseball.expected = c(p[1:3], 1 - sum(p[1:3]))
 baseball.game = c(5, 5, 4, 11)
-chisq.test(baseball.game, p=baseball.expected)
+
+plot(k, prop.table(baseball.game), type="h", lwd=2, lty=1, ylab="Freq")
+lines(k + .2, baseball.expected, type="h", lwd=2, lty=2) 
+
+result = chisq.test(baseball.game, p = baseball.expected, simulate.p.value=TRUE)
+result
+cat("p-value = ", result$p.value, ", p-value 太小代表不服从分布")
 ```
 
-## 3.4 (Categorizing ages in the twins dataset). The variable AGE gives the age (in years) of twin 1.
+## 3.4 (Categorizing ages in the twins dataset). 
+
+The variable AGE gives the age (in years) of twin 1.
+
 a. Use the cut function on AGE with the breakpoints 30, 40, and 50 to create a categorized version of the twin’s age.
 
 b. Use the table function to find the frequencies in the four age categories.
@@ -111,8 +127,118 @@ b. Use the table function to find the frequencies in the four age categories.
 c. Construct a graph of the proportions in the four age categories
 
 ```{r}
-data(twins)
+TWINS_DATASET_URL = "http://personal.bgsu.edu/~mrizzo/Rx/Rx-data/twins.dat.txt"
+twn = read.table(TWINS_DATASET_URL, header=TRUE, na.strings=".", sep=",")
 ```
+
+```{r}
+cut_age = cut(twn$AGE, breaks=c(0, 30, 40, 50, 80))
+freq = table(cut_age)
+barplot(prop.table(freq))
+```
+
+## 3.5 (Relating age and wage in the twins dataset). 
+
+The variables AGE and HRWAGEL contain the age (in years) and hourly wage (in dollars) of twin 1.
+
+a. Using two applications of the cut function, create a categorized version of AGE using the breakpoints 30, 40, and 50, and a categorized version of HRWAGEL using the same breakpoints as in Section 3.3.
+
+b. Using the categorized versions of AGE and HRWAGEL, construct a contin- gency table of the two variables using the function table.
+
+c. Use the prop.table function to find the proportions of twins in each age class that have the different wage groups.
+
+d. Construct a suitable graph to show how the wage distribution depends on the age of the twin.
+
+e. Use the conditional proportions in part (c) and the graph in part (d) to explain the relationship between age and wage of the twins.
+
+```{r}
+cut_age = cut(twn$AGE, c(0, 30, 40, 50, 80))
+cut_hrwagel = cut(twn$HRWAGEL, c(0, 7, 13, 20, 150))
+ct_table = table(cut_age, cut_hrwagel)
+ct_table
+```
+
+```{r}
+prop_table = prop.table(ct_table, margin=1)
+prop_table
+```
+
+```{r}
+barplot(t(prop_table), 
+        ylim=c(0, 1.3),
+        legend.text=dimnames(prop_table)$cut_hrwagel)
+```
+
+## 3.6 (Relating age and wage in the twins dataset, continued).
+
+a. Using the contingency table of the categorized version of AGE and HRWAGEL and the function chisq.test, perform a test of independence of age and wage. Based on this test, is there significant evidence to conclude that age and wage are dependent? 
+
+b. Compute and display the Pearson residuals from the test of independence.
+Find the residuals that exceed 2 in absolute value.
+
+c. Use the function mosaicplot with the argument shade=TRUE to construct a mosaic plot of the table counts showing the extreme residuals.
+
+d. Use the numerical and graphical work from parts (b) and (c) to explain how the table of age and wages differs from an independence structure.
+
+```{r}
+result = chisq.test(ct_table)
+result
+cat("p-value = ", result$p.value, ", p-value 太小代表两个变量不独立")
+```
+
+```{r}
+result$residuals
+abs(result$residuals) > 2
+```
+
+```{r}
+mosaicplot(ct_table, shade=TRUE)
+```
+
+(40, 50] 岁的 twins 很有可能拿到 (20, 150] 区间的工资。这两个变量之间不是独立的。
+<br>
+<br>
+<br>
+
+
+## 3.7 (Dice rolls, continued). 
+
+Suppose you roll a pair of dice 1000 times and you are interested in the relationship between the maximum of the two rolls and the sum of the rolls.
+
+a. Using the sample function twice, simulate 1000 rolls of two dice and store the simulated rolls in the variables die1 and die2.
+
+b. The pmax function will return the parallel maximum value of two vectors.
+
+Using this function, compute the maximum for each of the 1000 pair of rolls and store the results in the vector max.rolls. Similarly, store the sum for each pair of rolls and store the sums in the vector sum.rolls.
+
+c. Using the table function, construct a contingency table of the maximum roll and the sum of rolls.
+
+d. By the computation of conditional proportions, explore the relationship between the maximum roll and the sum of rolls.
+
+```{r}
+die1 = sample(6, 1000, replace=TRUE)
+die2 = sample(6, 1000, replace=TRUE)
+```
+
+```{r}
+max.rolls = pmax(die1, die2)
+sum.rolls = die1 + die2
+```
+
+```{r}
+result = table(max.rolls, sum.rolls)
+result
+```
+
+```{r}
+mosaicplot(result, shade=TRUE)
+```
+
+很容易发现，骰子的最大值和骰子的和之间有很强的相关性。
+<br>
+<br>
+<br>
+
 
 ## 3.8 (Are the digits of π random?). 
 The National Institute of Standards and Technology has a web page that lists the first 5000 digits of the irrational number π. One can read these digits into R by means of the script
@@ -126,9 +252,7 @@ barplot(prop.table(table(pidigits)))
 ```
 
 ```{r}
-chisq.test(table(pidigits), punif(1:10))
-```
-
-```{r}
-
+result = chisq.test(table(pidigits))
+result
+cat("p-value = ", result$p.value, ", p-value 太小代表不服从分布")
 ```
