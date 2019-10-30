@@ -1,0 +1,94 @@
+---
+title: "Homework 1"
+output:
+  pdf_document:
+    fig_caption: true
+    keep_tex: true
+    latex_engine: xelatex
+---
+
+## Problem 3
+
+首先，求出 g(x) 的分布函数。
+
+$$
+G(x) = \int_0^xg(x)dx =
+\begin{cases}
+\frac{5}{7}x& 0 \le x < 0.1 \\
+\frac{10}{7}x-\frac{1}{14}& 0.1 \le x < 0.7 \\
+\frac{5}{21}x+\frac{16}{21}& 0.7 \le x < 1
+\end{cases}
+$$
+
+然后，求出它的反函数。
+
+$$
+G^{-1}(x)=
+\begin{cases}
+\frac{7}{5}x& 0 \le x < \frac{1}{14} \\
+\frac{7}{10}x + \frac{1}{20} & \frac{1}{14} \le x < \frac{13}{14} \\
+\frac{21}{5}x - \frac{16}{5} & \frac{13}{14} \le x < 1 \\
+\end{cases}
+$$
+
+由此，我们可以先生成 X ~ U(0, 1)，而后代入反函数，得到服从 g(x) 分布的随机数。
+
+```{r}
+x = runif(30000)
+G = function(x) {
+  result = numeric()
+  if (0 <= x && x <= 1/14) result = (7/5*x)
+  else if (1/14 <= x && x <= 13/14) result = (7/10*x+1/20)
+  else if (13/14 <= x && x <= 1) result = (21/5*x-16/5)
+  return (result)
+}
+hist(sapply(x, G), breaks=100)
+```
+
+## Problem 5
+
+```{r}
+g = function(x) { return ((8/7) + (118/63)*x^2 - (74/63)*x^4 + (10/63)*x^6) }
+c_inv = integrate(g, -2, 2)
+c_inv
+c = 1 / c_inv$value
+```
+
+由此可知，$f(x) = cg(x)$。采用接受-拒绝法抽样。选择 $U(-2, 2)$ 作为建议分布。 $M = 4$。
+
+```{r}
+x = seq(-2, 2, length = 1000)
+plot(x, sapply(x, g), type="l")
+```
+
+```{r}
+f = function(x) { return (c * g(x)) }
+N = 50000
+y = runif(N) * 4 - 2 # U(-2, 2)
+u = runif(N)
+M = 3
+h = sapply(y, f) / 4 / (1 / 4)
+hist(y[u < h], breaks=100)
+```
+
+## Problem 7
+
+假设 
+$$
+A = \begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix}
+$$
+所以，
+$$
+Y_1 = aX_1 + bX_2 + \mu_1 \\
+Y_2 = cX_1 + dX_2 + \mu_2
+$$
+
+由 $X_1, X_2$ 的分布可以推得它们的边缘分布。容易证明 $X_1, X_2$ 相互独立。
+
+所以，$Y_1 \sim N(\mu_1, a^2+b^2)$，$Y_2 \sim N(\mu_1, c^2+d^2)$
+
+因此，$Y \sim N(\mu_1, a^2+b^2, \mu_2, c^2+d^2, \frac{ac+bd}{\mu_1\mu_2})$。
+
