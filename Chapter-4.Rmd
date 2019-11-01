@@ -1,11 +1,11 @@
 ---
 title: "Chapter 4: Presentation Graphics"
 output:
-  html_notebook: default
   pdf_document:
     fig_caption: true
     keep_tex: true
     latex_engine: xelatex
+  html_notebook: default
 ---
 
 Alex Chi
@@ -22,7 +22,7 @@ b. Revise the basic plot by labeling the horizontal axis with “Speed (mpg)”a
 
 c. Revise the plot by changing the plot symbol from the default open circles to red filled triangles (col="red", pch=17).
 
-```{r}
+```{r fig.showtext=TRUE}
 plot(cars$speed, cars$dist, 
      xlab="Speed (mpg)", 
      ylab="Stopping Distance (ft)",
@@ -94,7 +94,18 @@ d. Label the one large negative residual in the graph with the label “NEG”in
 
 e. Use the identify function to find the row numbers of two observations that have residuals close to zero.
 
+Note: 似乎现在的 R 语言没有 fit.linear，因此使用 lm 生成线性模型。
 
+```{r}
+fit = lm(speed ~ dist, cars)
+residual = resid(fit)
+plot(residual ~ cars$speed)
+abline(0, 0, lwd=3, col="blue")
+text(20, 5.8, "POS", col="blue")
+text(23, 5, "POS", col="blue")
+text(14, -6.5, "NEG", col="red")
+?identify
+```
 
 ## 4.4 (Multiple graphs). 
 
@@ -155,3 +166,35 @@ curve(dbeta(x, 6, 2), from=0, to=1, add=TRUE)
 title(expression(f(y)==frac(1,B(a,b))*y^{a-1}*(1-y)^{b-1}))
 ```
 
+## 4.7 (lattice graphics)
+
+The dataset faithful contains the duration of the eruption (in minutes) eruptions and the waiting time until the next eruption waiting (in minutes) for the Old Faithful geyser. One is interested in exploring the relationship between the two variables.
+
+a. Create a factor variable length that is “short” if the eruption is smaller than 3.2 minutes, and “long” otherwise.
+
+b. Using the bwplot function in the lattice package, construct parallel box- plots of the waiting times for the “short” and “long” eruptions.
+
+c. Using the densityplot function, construct overlapping density plots of the waiting times of the “short” and “long” eruptions.
+
+```{r}
+library(lattice)
+faithful$length = ifelse(faithful$eruptions < 3.2, "short", "long")
+bwplot(waiting ~ length, faithful)
+densityplot(~ waiting, groups = length, faithful)
+```
+
+## 4.8 ( ggplot2 graphics). 
+
+In Exercise 4.7, the waiting times for the Old Faithful geysers were compared for the short and long eruptions where the variable length in the faithful data frame defines the duration of the erup- tion.
+
+a. Suppose a data frame dframe contains a numeric variable num.var and a factor factor.var. After the ggplot2 package has been loaded, then the R commands ggplot(dframe, aes(x = num.var, color = factor.var)) + geom_density() will construct overlapping density estimates of the variable num.var for each value of the factor factor.var. Use these commands to construct overlapping density estimates of the waiting times of the geysers with short and long eruptions.
+
+b. With a data frame dframe containing a numeric variable num.var and a factor factor.var, the ggplot2 syntax will construct parallel boxplots of the variable num.var for each value of the factor factor.var. Use these commands to construct parallel boxplots of the waiting times of the geysers with short and long eruptions.
+
+```{r}
+library(ggplot2)
+
+ggplot(faithful, aes(x = waiting, color = length)) + geom_density()
+
+ggplot(faithful, aes(y = waiting, x = length)) + geom_boxplot()
+```
