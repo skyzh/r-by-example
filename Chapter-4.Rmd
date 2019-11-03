@@ -22,7 +22,7 @@ b. Revise the basic plot by labeling the horizontal axis with “Speed (mpg)”a
 
 c. Revise the plot by changing the plot symbol from the default open circles to red filled triangles (col="red", pch=17).
 
-```{r fig.showtext=TRUE}
+```{r}
 plot(cars$speed, cars$dist, 
      xlab="Speed (mpg)", 
      ylab="Stopping Distance (ft)",
@@ -104,7 +104,6 @@ abline(0, 0, lwd=3, col="blue")
 text(20, 5.8, "POS", col="blue")
 text(23, 5, "POS", col="blue")
 text(14, -6.5, "NEG", col="red")
-?identify
 ```
 
 ## 4.4 (Multiple graphs). 
@@ -112,7 +111,11 @@ text(14, -6.5, "NEG", col="red")
 The dataset mtcars contains measurements of fuel consumption (variable mpg) and other design and performance characteristics for a group of 32 automobiles. Using the mfrow argument to par, construct scatterplots of each of the four variables disp (displacement), wt (weight), hp (horsepower), drat (rear axle ratio) with mileage (mpg) on a two by two ar- ray. Comparing the four graphs, which variable among displacement, weight, horsepower, and rear axle ratio has the strongest relationship with mileage?
 
 ```{r}
-
+par(mfrow = c(2, 2))
+plot(disp ~ mpg, mtcars)
+plot(wt ~ mpg, mtcars)
+plot(hp ~ mpg, mtcars)
+plot(drat ~ mpg, mtcars)
 ```
 
 ## 4.5 (Drawing houses). 
