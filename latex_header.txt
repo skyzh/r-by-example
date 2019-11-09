@@ -1,4 +1,4 @@
-\documentclass[11pt]{article}
+\documentclass[12pt]{article}
 \PassOptionsToPackage{no-math}{fontspec}
 \usepackage{xeCJK}
 \usepackage{xcolor}
@@ -14,7 +14,7 @@
 \setCJKmonofont{Noto Sans CJK SC}
 \setromanfont{Noto Serif Regular}
 \setsansfont{Noto Sans Regular}
-\setmonofont{Fira Code Light}[
+\setmonofont{Fira Code Regular}[
   Contextuals=Alternate  % Activate the calt feature
 ]
 
