@@ -140,7 +140,7 @@ Apply both square root and log transformations. Which transformation makes the a
 ```{r}
 roots = sqrt(college$Alumni.giving) 
 logs = log(college$Alumni.giving)
-stripchart(college$Alumni.giving)
+stripchart(college$Alumni.giving, method="stack")
 college[order(college$Alumni.giving,decreasing=TRUE),][1:3,]
 hist(roots)
 hist(logs)
@@ -159,3 +159,9 @@ c. As one moves from Tier 4 to Tier 1, how does the spread of the giving rates c
 d. We note from parts (b) and (c), that small giving rates tend to have small variation, and large giving rates tend to have large variation. One way of removing the dependence of average with spread is to apply a power transformation such as a square root or a log. Construct parallel stripcharts of the square roots of the giving rates, and parallel boxplots of the log giving rates.
 
 e. Looking at the two sets of parallel stripcharts in part (d), were the square root rates or the log rates successful in making the spreads approximately the same between groups?
+
+```{r}
+stripchart(Alumni.giving ~ Tier, college, method="stack")
+stripchart(roots ~ Tier, college, method="stack")
+boxplot(logs ~ Tier, college, method="stack")
+```
