@@ -1,0 +1,173 @@
+---
+title: "Chapter 6: Basic Inference Methods"
+output:
+  pdf_document:
+    fig_caption: true
+    keep_tex: true
+    latex_engine: xelatex
+  html_notebook: default
+---
+
+Alex Chi
+
+# Exercises
+
+```{r}
+marathoners = read.csv("http://personal.bgsu.edu/~mrizzo/Rx/Rx-data/nyc-marathon.csv")
+```
+
+## 6.1 (Gender of marathoners). 
+
+In 2000, the proportion of females who competed in marathons in the United States was 0.375. One wonders if the proportion of female marathoners has changed in the ten-year period from 2000 to 2010. One collects the genders of 276 people who competed in the 2010 New York City Marathon – in this sample, 120 were women.
+
+a. If p denotes the proportion of 2010 marathoners who are female, use the prop.test function to test the hypothesis that p = 0.375. Store the calcu- lations of the test in the variable Test.
+```{r}
+Test = prop.test(120, 276, p=0.375)
+Test
+```
+
+b. From the components of Test, construct a 95% interval estimate for p.
+```{r}
+Test$conf.int
+```
+
+c. Using the function binom.test, construct an exact-test of the hypothesis.
+Compare this test with the large-sample test used in part (a).
+```{r}
+binom.test(120, 276, p=0.375)
+```
+
+## 6.2 (Ages of marathoners)
+
+The datafile “nyc.marathon.txt” contains the gender, age, and completion time (in minutes) for 276 people who completed the 2010 New York City Marathon. It was reported that the mean ages of men and women marathoners in 2005 were respectively 40.5 and 36.1.
+
+a. Create a new dataframe “women.marathon” that contains the ages and completion times for the women marathoners.
+```{r}
+women.marathon = marathoners[marathoners$Gender == "female", ]
+women.marathon
+```
+
+b. Use the t.test function to construct a test of the hypothesis that the mean age of women marathoners is equal to 36.1.
+```{r}
+Test = t.test(women.marathon$Age, mu=36.1)
+Test
+```
+
+c. As an alternative method, use the wilcox.test function to test the hy- pothesis that the median age of women marathoners is equal to 36.1. Com- pare this test with the t-test used in part (b).
+```{r}
+Test = wilcox.test(women.marathon$Age, mu=36.1)
+Test
+```
+
+d. Construct a 90% interval estimate for the mean age of women marathoners
+```{r}
+Test = t.test(women.marathon$Age, conf.level=0.9)
+Test
+Test$conf.int
+```
+
+## 6.3 (Ages of marathoners, continued). 
+
+From the information in the 2005 report, one may believe that men marathoners tend to be older than women marathons.
+
+a. Use the t.test function to construct a test of the hypothesis that the mean ages of women and men marathoners are equal against the alternative hypothesis that the mean age of men is larger.
+```{r}
+t.test(Age ~ Gender, marathoners, alternative="less")
+```
+
+b. Construct a 90% interval estimate for the difference in mean ages of men and women marathoners.
+```{r}
+Test = t.test(Age ~ Gender, marathoners, conf.level=0.9)
+Test
+diff(Test$estimate)
+```
+
+c. Use the alternative Mann-Whitney-Wilcoxon test (function wilcox.test) to test the hypothesis that the ages of the men and ages of the women come from populations with the same location parameter against the alternative that the population of ages of the men have a larger location parameter. Compare the result of this test with the t-test performed in part (a).
+```{r}
+wilcox.test(Age ~ Gender, marathoners, alternative="less")
+```
+
+## 6.4 (Measuring the length of a string). 
+
+An experiment was performed in an introductory statistics class to illustrate the concept of measurement bias. The instructor held up a string in front of the class and each student guessed at the string’s length. The following are the measurements from the 24 students (in inches).
+
+22 18 27 23 24 15 26 22 24 25 24 18 18 26 20 24 27 16 30 22 17 18 22 26 
+
+a. Use the scan function to enter these measurements into R.
+```{r}
+x = c(22, 18, 27, 23, 24, 15, 26, 22, 24, 25, 24, 18, 18, 26, 20, 24, 27, 16, 30, 22, 17, 18, 22, 26)
+```
+
+b. The true length of the string was 26 inches. Assuming that this sample of measurements represents a random sample from a population of student measurements, use the t.test function to test the hypothesis that the mean measurement μ is different from 26 inches.
+```{r}
+t.test(x, mu=26)
+```
+
+c. Use the t.test function to find a 90% confidence interval for the popula- tion mean μ.
+```{r}
+t.test(x, mu=26, conf.level=0.9)
+```
+
+d. The t-test procedure assumes the sample is from a population that is normally distributed. Construct a normal probability plot of the measure- ments and decide if the assumption of normality is reasonable.
+```{r}
+hist(x)
+ks.test(x, "pnorm")
+```
+
+## 6.5 (Comparing snowfall of Buffalo and Cleveland). 
+
+The datafile “buf- falo.cleveland.snowfall.txt” contains the total snowfall in inches for the cities Buffalo and Cleveland for the seasons 1968-69 through 2008-09.
+```{r}
+snowfall = read.table("Rx-data/buffalo.cleveland.snowfall.txt", header=TRUE)
+```
+
+a. Compute the differences between the Buffalo snowfall and the Cleveland snowfall for all seasons.
+```{r}
+snowfall$diff = snowfall$Cleveland - snowfall$Buffalo
+snowfall
+```
+
+b. Using the t.test function with the difference data, test the hypothesis that Buffalo and Cleveland get, on average, the same total snowfall in a season.
+```{r}
+t.test(snowfall$diff, mu = 0)
+```
+
+c. Use the t.test function to construct a 95% confidence interval of the mean difference in seasonal snowfall.
+```{r}
+t.test(snowfall$diff, mu = 0, conf.level = 0.95)
+```
+
+## 6.6 (Comparing Etruscan and modern Italian skulls). 
+
+Researchers were interested if ancient Etruscans were native to Italy. The dataset“Etruscan- Italian.txt” contains the skull measurements from a group of Etruscans and modern Italians. There are two relevant variables in the dataset: x is the skull measurement and group is the type of skull.
+```{r}
+italian = read.table("Rx-data/Etruscan-Italian.txt")
+```
+
+a. Assuming that the data represent independent samples from normal dis- tributions, use the t.test function to test the hypothesis that the mean Etruscan skull measurement μE is equal to the mean Italian skull mea- surement μI.
+```{r}
+t.test(x ~ group, italian)
+```
+
+b. Use the t.test function to construct a 95% interval estimate for the dif- ference in means μE−μI.
+```{r}
+t.test(x ~ group, italian, conf.level=0.95)$conf.int
+```
+
+c. Use the two-sample Wilcoxon procedure implemented in the function wilcox.test to find an alternative 95% interval estimate for the difference μE−μI.
+```{r}
+wilcox.test(x ~ group, italian, conf.int=TRUE)
+```
+
+## 6.7 (President’s heights). 
+In Example 1.2, the height of the election winner and loser were collected for the U.S. Presidential elections of 1948 through 2008. Suppose you are interested in testing the hypothesis that the mean height of the election winner is equal to the mean height of the election loser. Assuming that this data represent paired data from a hypothetical population of elections, use the t.test function to test this hypothesis. Interpret the results of this test.
+
+```{r}
+winner = c(185, 182, 182, 188, 188, 188, 185, 185, 177, 
+           182, 182, 193, 183, 179, 179, 175)
+opponent = c(175, 193, 185, 187, 188, 173, 180, 177, 183, 
+             185, 180, 180, 182, 178, 178, 173)
+t.test(winner, opponent)
+```
+
+Therefore, they're not equal.
