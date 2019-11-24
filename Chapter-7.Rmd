@@ -1,0 +1,168 @@
+---
+title: "Chapter 7: Regression"
+output:
+  pdf_document:
+    fig_caption: true
+    keep_tex: true
+    latex_engine: xelatex
+  html_notebook: default
+---
+
+Alex Chi
+
+# Exercises
+
+## 7.1 (mammals data). 
+
+The mammals data set in the MASS package records brain size and body size for 62 different mammals. Fit a regression model to describe the relation between brain size and body size. Display a residual plot using the plot method for the result of the lm function. Which observation (which mammal) has the largest residual in your fitted model?
+
+```{r}
+library(MASS)
+attach(mammals)
+fit = lm(body ~ brain)
+plot(fit, which=1)
+mammals[33, ]
+```
+
+## 7.2 (mammals, continued). 
+
+Refer to the mammals data in package MASS.
+Display a scatterplot of log(brain) vs log(body). Fit a simple linear regres- sion model to the transformed data. What is the equation of the fitted model? Display a fitted line plot and comment on the fit. Compare your results with results of Exercise 7.1.
+
+```{r}
+plot(log(body) ~ log(brain))
+fit = lm(log(body) ~ log(brain))
+fit
+abline(fit)
+```
+
+## 7.3 (mammals residuals). 
+
+Refer to Exercise 7.2. Display a plot of residuals vs fitted values and a normal-QQ plot of residuals. Do the residuals appear to be approximately normally distributed with constant variance?
+
+```{r}
+plot(fit, which=1)
+plot(fit, which=2)
+```
+
+## 7.4 (mammals summary statistics). 
+
+Refer to Exercise 7.2. Use the sum- mary function on the result of lm to display the summary statistics for the model. What is the estimate of the error variance? Find the coefficient of determination (R2) and compare it to the square of the correlation between the response and predictor. Interpret the value of (R2) as a measure of fit.
+
+```{r}
+summary(fit)
+```
+
+```{r}
+detach(mammals)
+```
+
+## 7.5 (Hubble’s Law). 
+
+In 1929 Edwin Hubble investigated the relationship between distance and velocity of celestial objects. Knowledge of this rela- tionship might give clues as to how the universe was formed and what may happen in the future. Hubble’s Law is is Recession Velocity = H0×Distance, where H0is Hubble’s constant. This model is a straight line through the origin with slope H0. Data that Hubble used to estimate the constant H0are given on the DASL web at http://lib.stat.cmu.edu/DASL/Datafiles/Hubble.
+html. Use the data to estimate Hubble’s constant by simple linear regression
+
+```{r}
+data = read.table("Rx-Data/Hubble.txt", header=TRUE)
+attach(data)
+recession_velocity=abs(recession_velocity)
+fit = lm(recession_velocity ~ distance)
+fit$coefficients
+plot(recession_velocity ~ distance)
+abline(fit)
+detach(data)
+```
+
+## 7.6 (peanuts data). 
+
+The data file “peanuts.txt” (Hand et al. [21]) records levels of a toxin in batches of peanuts. The data are the average level of aflatoxin X in parts per billion, in 120 pounds of peanuts, and percentage of non-contaminated peanuts Y in the batch. Use a simple linear regression model to predict Y from X. Display a fitted line plot. Plot residuals, and comment on the adequacy of the model. Obtain a prediction of percentage of non-contaminated peanuts at levels 20, 40, 60, and 80 of aflatoxin.
+
+```{r}
+peanuts = read.table("Rx-Data/peanuts.txt", header=TRUE)
+attach(peanuts)
+peanuts
+fit = lm(Percent ~ Aflatoxin)
+plot(Percent ~ Aflatoxin)
+abline(fit)
+plot(fit, which=1)
+aflatoxin = c(20, 40, 60, 80)
+new = data.frame(Aflatoxin = aflatoxin)
+predict(fit, newdata = new, interval = "pred")
+detach(peanuts)
+```
+
+## 7.7 (cars data). 
+
+For the cars data in Example 7.1, compare the coefficient of determination R2for the two models (with and without intercept term in the model). Hint: Save the fitted model as L and use summary(L) to display R2. Interpret the value of R2as a measure of the fit.
+
+```{r}
+attach(cars)
+fit1 = lm(dist ~ speed)
+fit2 = lm(dist ~ speed + 0)
+summary(fit1)$r.squared
+summary(fit2)$r.squared
+detach(cars)
+```
+
+## 7.8 (cars data, continued). 
+
+Refer to the cars data in Example 7.1. Create a new variable speed2 equal to the square of speed. Then use lm to fit a quadratic model dist = β0+β1speed+β2(speed)2+ε.
+
+```{r}
+attach(cars)
+speed2 = speed ^ 2
+fit = lm(dist ~ speed + speed2)
+plot(dist ~ speed)
+curve(fit$coef[1] + fit$coef[2] * x + fit$coef[3] * (x ^ 2), add=TRUE)
+detach(cars)
+```
+
+## 7.9 (Cherry Tree data, quadratic regression model). 
+
+Refer to the Cherry Tree data in Example 7.3. Fit and analyze a quadratic regression model y = b0+ b1x + b2x2for predicting volume y given diameter x. Check the residual plots and summarize the results.
+
+```{r}
+cherry = read.table("Rx-Data/cherry.txt", header=TRUE)
+attach(cherry)
+cherry
+fit = lm(Volume ~ Diam + I(Diam^2))
+plot(Volume ~ Diam)
+curve(fit$coef[1] + fit$coef[2] * x + fit$coef[3] * x ^ 2, add=TRUE)
+plot(fit, which=1)
+summary(fit)
+detach(cherry)
+```
+
+## 7.10 (lunatics data). 
+
+Refer to the “lunatics” data in Example 7.8. Repeat the analysis, after deleting the two counties that are offshore islands, NAN- TUCKET and DUKES counties. Compare the estimates of slope and intercept with those obtained in Example 7.8. Construct the plots and analyze the residuals as in Example 7.8.
+
+```{r}
+lunatics = read.table("Rx-Data/lunatics.txt", header=TRUE)
+attach(lunatics)
+lunatics = lunatics[COUNTY != "NANTUCKET" & COUNTY != "DUKES", ]
+M = lm(PHOME ~ I(1 / DIST))
+plot(PHOME ~ DIST)
+curve(M$coef[1] + M$coef[2] / x, add=TRUE)
+summary(M)
+detach(lunatics)
+```
+
+## 7.11 (twins data). 
+
+Import the data file “twins.txt” using read.table. (The commands to read this data file are shown in the twins example in Section 3.3, page 85.) The variable DLHRWAGE is the difference (twin 1 minus twin 2) in the logarithm of hourly wage, given in dollars. The variable HRWAGEL is the hourly wage of twin 1. Fit and analyze a simple linear regression model to predict the difference DLHRWAGE given the logarithm of the hourly wage of twin 1.
+
+```{r}
+twins = read.table("Rx-data/twins.txt", header=TRUE, sep=",", na.strings=".")
+attach(twins)
+M = lm(DLHRWAGE ~ I(log(HRWAGEL)))
+plot(DLHRWAGE ~ HRWAGEL)
+curve(M$coef[1] + M$coef[2] * log(x), add=TRUE)
+summary(M)
+detach(twins)
+```
+
+
+
+
+
