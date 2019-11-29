@@ -1,0 +1,226 @@
+---
+title: "Chapter 11 - Simulation Experiments"
+output:
+  pdf_document:
+    fig_caption: true
+    keep_tex: true
+    latex_engine: xelatex
+  html_notebook: default
+---
+
+Alex Chi
+
+# Exercises
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 11.1 (Playing Roulette). 
+Suppose one plays roulette repeatedly at a casino. In a single play, one bets $5 on “red”; the player wins $5 with proba- bility 18/38 and loses $5 with probability 20/38. If the roulette game (with the same bet) is played 20 times, then the individual play winnings can be viewed as a sample of size 20 selected with replacement from the vector (5, −5), where the respective probabilities are given in the vector (18/38, 20/38).
+These play winnings can be simulated using the function sample with the prob vector that gives the sampling probabilities.
+
+```{r}
+play = function() { sample(c(5, -5), size=20, replace=TRUE, prob=c(18 / 38, 20 / 38)) }
+```
+
+a. Write a short function to compute the sum of the winnings from 20 plays at the roulette wheel. Use the replicate function to repeat this “20 play simulation” 100 times. Find the approximate probability that the total winning is positive.
+
+```{r}
+play_once = play()
+win_sum = sum(play_once > 0)
+win_sum
+result = replicate(100, (function() { sum(play()) })())
+sum(result > 0) / 100
+```
+
+b. The number of winning plays is a binomial random variable with 20 trials where the probability of success is 18/38. Using the dbinom function, find the exact probability that your total winning is positive and check that the approximate answer in part (a) is close to the exact probability.
+
+```{r}
+sum(dbinom(11:20, size=20, prob=18/38))
+```
+
+c. Suppose you keep track of your cumulative winning during the game and record the number of plays P where your cumulative winning is positive.
+If the individual play winnings are stored in the vector winnings, the expression cumsum(winnings) computes the cumulative winnings, and the expression sum(cumsum(winnings)>0) computes a value of P. Adjust your function from part (a) to compute the value of P. Simulate the process 500 times and construct a frequency table of the outcomes. Graph the outcomes and discuss which values of P are likely to occur.
+
+```{r}
+result = replicate(500, (function() { sum(cumsum(play()) > 0) })())
+hist(result, breaks=20)
+```
+
+## 11.2 (Checking hats). 
+
+Suppose that men in the old days wore only two types of hats, say black and grey, and hats of a particular type are indis- tinguishable. Assume 20 men with hats visit the restaurant and half of the men are wearing each type of hat. The hats are randomly mixed, and we are interested in the number of men who leave the restaurant with the correct hat.
+
+a. Modify the function scramble.hats to compute the number of correct matches in this setting. (The only change is the definition of the vector hats – if one represents a black hat and a grey hat by 1 and 2, respectively, then hats consists of ten 1’s and ten 2’s.)
+
+```{r}
+scramble.hats = function() { 
+  hats = rep(c(1, 2), 10)
+  mixed.hats = sample(c(1,2), size=20, prob=c(0.5, 0.5), replace=TRUE)
+  sum(hats == mixed.hats)
+}
+```
+
+b. Using the function replicate, repeat this simulation for 1000 trials. Store the number of matches for the 1000 experiments in the vector matches.
+
+```{r}
+result = replicate(1000, scramble.hats())
+```
+
+c. From the simulated values, approximate the probability that 10 or more men receive the correct hats. Also, find the expected number of correct matches.
+
+```{r}
+prob = sum(result >= 10) / length(result)
+prob
+```
+
+## 11.3 (Birthday problem). 
+
+Suppose you have a class of n students and you’re interested in the probability that at least two students in the class share the same birthday. If one assumes that each birthday is equally likely from the set {1, 2, ..., 365}, then collecting birthdays can be viewed as a sample of size n chosen with replacement from the set.
+
+a. Write a function with argument n that samples n birthdays and computes the number of unique birthdays observed.
+
+```{r}
+birthday = function(n) {
+  days = sample(1:365, n, replace=TRUE)
+  length(unique(days))
+}
+```
+
+b. Using the replicate function, repeat this simulation 1000 times for the special case of n = 30 students.
+
+```{r}
+result = replicate(1000, birthday(30))
+```
+
+c. From the output, approximate the probability that there is at least one matching birthday among the 30 birthdays.
+
+```{r}
+prob = sum(result < 30) / length(result)
+prob
+```
+
+d. It can be shown that the exact probability of a birthday match is given by P(match) = 1−365P30 36530, whereNPkis the number of ways of arranging a sample of k of N distinct items. Compare the approximate probability in part (d) with the exact probability.
+
+```{r}
+perm <- function(n, k) { choose(n,k) * factorial(k) }
+expected_prob = 1 - perm(365, 30) / 365^30
+expected_prob
+```
+
+e. The R function pbirthday, with argument n, computes the (approximate) probability of at least one match among n birthdays. Use this function to check your answer in part (d).
+
+```{r}
+pbirthday(30)
+```
+
+## 11.4 (Streakiness). 
+
+In the chapter, the focus was on the length of the longest streak in a binary sequence. Another way to measure streakiness in a sequence is the number of switches from 0 to 1 or from 1 for 0. For example, if the binary sequence is given by 0 1 0 0 0 1 0 0 1 there are three switches from 0 to 1 and two switches from 1 to 0 and so the total number of switches is equal to five. If y is a vector containing the binary sequence, then the R expression sum(abs(diff(y))) will compute the number of switches.
+
+a. Construct a function switches that computes the number of switches for a binary vector y. Test this function by finding the number of switches in Chase Utley’s game hitting sequence for the 2006 season.
+
+```{r}
+dat = read.table("Rx-data/utley2006.txt", header=TRUE, sep="\t")
+utley = as.numeric(dat$H > 0)
+switches <- function(y) { sum(abs(diff(y))) }
+switches(utley)
+```
+
+b. By making a slight change to the function random.streak, construct a function that computes the number of switches for a random permutation of the 1’s and 0’s in the vector y.
+
+```{r}
+random.streak <- function(y) { 
+  mixed.up.y = sample(y) 
+  switches(mixed.up.y)
+}
+```
+
+c. Use the replicate function to repeat the random permutation in part (b) for 10,000 simulations. Construct a histogram of the number of switches for these 10,000 random sequences. Is the number of switches in Utley’s se- quence consistent with the values generated from these random sequences? Using the number of switches statistic, did Utley display unusually streaky behavior during this season?
+
+```{r}
+result = replicate(10000, random.streak(utley))
+hist(result)
+```
+
+## 11.5 (Collecting state quarters). 
+
+In 1999, the United States launched the 50 State Quarters program where each of the 50 states was honored with a special quarter. Suppose you purchase 100“state”quarters where each quarter is equally likely to feature one of the 50 states.
+
+a. Write a function using the sample function to simulate the purchase of 100 quarters and record the number of unique quarters that are purchased.
+
+```{r}
+purchase.quarter <- function() {
+  purchase = sample(1:50, 100, replace=TRUE)
+  length(unique(purchase))
+}
+```
+
+b. Using the replicate function, repeat this process for 1000 purchases.
+Construct a table of the number of unique quarters you obtain in these 1000 simulations. Use this table to estimate the probability that you obtain at least 45 unique quarters.
+
+```{r}
+result = replicate(1000, purchase.quarter())
+table(result)
+sum(result >= 45) / length(result)
+```
+
+c. Use the output from part (b) to find the expected number of unique quar- ters.
+
+```{r}
+sum(result) / 1000
+```
+
+d. Suppose you are able to complete your quarter set by purchasing state quarters from a coin shop for $2 for each quarter. Revise your function to compute the total (random) cost of completing the quarter set. Using the replicate function, repeat the quarter-purchasing process 1000 times and compute the expected cost of completing your set.
+
+```{r}
+purchase.quarter.until.complete <- function() {
+  x = c()
+  i = 0
+  while (length(unique(x)) < 50) {
+    purchase = sample(1:50, 1, replace=TRUE)
+    x = c(x, purchase)
+    i = i + 1
+  }
+  i
+}
+result = replicate(1000, purchase.quarter.until.complete())
+mean(result)
+```
+
+## 11.6 (How many students are excluded?). 
+
+In [35], Frederick Mosteller mentioned the following interesting probability question that can be ad- dressed by a simulation experiment. Suppose there is a class of 10 students and each student independently chooses two other class members at random.
+How many students will not be chosen by any other students?
+
+a. Write a function mosteller that will run a single simulation of this ex- periment.
+
+```{r}
+mosteller <- function() {
+  students = 1:10
+  m = matrix(0, nrow=10, ncol=10)
+  for (j in 1:10) {
+    s = sample(students[-j], size=2)
+    m[j, s] = c(1, 1)
+  }
+  sum(colSums(m) == 0)
+}
+```
+
+b. Using the replicate function, repeat this simulation for 100 iterations.
+
+```{r}
+result = replicate(100, mosteller())
+result
+```
+
+c. Use the table function to tabulate the number of students not chosen over the 100 experiments.
+
+```{r}
+table(result)
+```
+
+d. What is the most likely number of students not chosen? What is the ap- proximate probability of this outcome
+
+Answer: 1

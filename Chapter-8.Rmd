@@ -1,0 +1,100 @@
+---
+title: 'Chapter 8: Analysis of Variance'
+output:
+  pdf_document:
+    fig_caption: true
+    keep_tex: true
+    latex_engine: xelatex
+  html_notebook: default
+---
+
+Alex Chi
+
+# Exercises
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 8.1 (Comparing average gas mileage). 
+
+A table of gas mileages on four new models of Japanese luxury cars is given in Larsen & Marx [30, Ques- tion 12.1.1], which is shown in Table 1.4, page 27. See Example 1.11 for a method of entering this data. Test if the four models (A, B, C, D) give the same gas mileage, on average, at α = 0.05 significance.
+
+```{r}
+y1 = c(22, 26)
+y2 = c(28, 24, 29)
+y3 = c(29, 32, 28)
+y4 = c(23, 24)
+y = c(y1, y2, y3, y4)
+Model = c(rep("A", 2), rep("B", 3), rep("C", 3), rep("D", 2))
+mileages = data.frame(y, Model)
+```
+
+```{r}
+oneway.test(y ~ Model, mileages, var.equal=TRUE)
+```
+
+## 8.2 (Yields of plants). 
+
+The PlantGrowth data is an R dataset that contains results from an experiment on plant growth. The yield of a plant is measured by the dried weight of the plant. The experiment recorded yields of plants for a control group and two different treatments. After a preliminary exploratory data analysis, use one-way ANOVA to analyze the differences in mean yield for the three groups. Start with the exploratory data analysis, and also check model assumptions. What conclusions, if any, can be inferred from this sample data?
+
+```{r}
+par(mfrow=c(1, 2))
+stripchart(weight ~ group, PlantGrowth, vertical=TRUE)
+boxplot(weight ~ group, PlantGrowth, vertical=TRUE)
+M = aov(weight ~ group, PlantGrowth)
+oneway.test(weight ~ group, PlantGrowth, var.equal=TRUE)
+model.tables(M, type="means")
+```
+
+## 8.3 (Differences in iris by species). 
+
+The iris data has 50 observations of four measurements for each of three species of iris: setosa, versicolor, and virginica. We are interested in possible differences in the sepal length of iris among the three species. Perform a preliminary analysis as in Example 8.3.
+Write the effects model for a one-way ANOVA. What are the unknown parameters? Next fit a one-way ANOVA model for Sepal.Length by Species using lm. Display the ANOVA table. What are the parameter estimates?
+
+```{r}
+par(mfrow=c(1, 2))
+attach(iris)
+stripchart(Sepal.Length ~ Species, vertical=TRUE)
+boxplot(Sepal.Length ~ Species, vertical=TRUE)
+meansd = function(x) c(mean=mean(x), sd=sd(x))
+by(Sepal.Length, Species, FUN=meansd)
+L = lm(Sepal.Length ~ Species)
+options(show.signif.stars=FALSE)
+anova(L)
+```
+
+## 8.4 (Checking model assumptions). 
+
+Refer to your results from Exercise 8.3. What are the assumptions required for inference? Analyze the residuals of the model to assess whether there is a serious departure from any of these assumptions. How can you check for normality of the error variable?
+
+Answer: Equal variance assumption, samples are independent.
+
+```{r}
+oneway.test(Sepal.Length ~ Species)
+plot(L$fit, L$res)
+abline(h = 0)
+qqnorm(L$res)
+qqline(L$res)
+```
+
+所以，前文的假设可以被验证，可以对这个模型做 ANOVA 分析。
+
+## 8.5 (Cancer survival data). 
+
+The cancer survival data “PATIENT.DAT”was introduced in Example 8.9. Start with the exploratory data analysis, and check for NID error model assumptions. Consider a transformation of the data if the assumptions for error are not satisfied. Complete a one-way ANOVA to determine whether mean survival times differ by organ. If there are significant differences, follow up with appropriate multiple comparisons to determine which means differ and describe how they differ.
+
+Answer: 把 $N(\mu, \sigma^2)$ 全部减掉 $\mu$。或者用 LSD。
+
+```{r}
+times = read.table("Rx-Data/PATIENT.DAT", sep="\t")
+names(times) = c("stomach","bronchus","colon","ovary","breast")
+times1 = stack(times)
+names(times1) = c("time", "organ")
+times1 = na.omit(times1)
+attach(times1)
+stripchart(time ~ organ, vertical=TRUE)
+boxplot(time ~ organ, vertical=TRUE)
+oneway.test(time ~ organ)
+oneway.test(time ~ organ, var.eq=TRUE)
+```
