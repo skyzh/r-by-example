@@ -1,0 +1,118 @@
+---
+title: 'Chapter 12: Bayesian Modeling'
+output:
+  pdf_document:
+    fig_caption: true
+    keep_tex: true
+    latex_engine: xelatex
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Alex Chi
+
+# Exercises
+
+## 12.1 (Learning about students sleep habits). 
+
+In Chapter 6, one is inter- ested in the mean number of hours μ slept by students at a particular college.
+Suppose that a particular professor’s prior beliefs about μ are represented by a normal curve with mean μ0= 6 hours and variance τ2 0= 0.25.
+
+a. Use the curve and dnorm functions to construct a plot of the prior density.
+
+```{r}
+curve(dnorm(x, mean=6, sd=0.5), from = 0, to = 12)
+```
+
+b. Use the qnorm function to find the quartiles of the prior density.
+
+```{r}
+qnorm(c(.25, .5, .75), mean=6, sd=0.5)
+```
+
+c. Find the probability (from the prior) that the mean amount of sleep ex- ceeds 7 hours (Use the pnorm function.)
+
+```{r}
+1 - pnorm(7, mean=6, sd=0.5)
+```
+
+## 12.2 (Learning about students sleep habits, continued). 
+
+Suppose the number of hours slept by a sample of n students, y1,...,yn, represent a random sample from a normal density with unknown mean μ and known variance σ2.
+
+The likelihood function of μ is given by L(μ) = exp ? −n 2σ2(¯ y −μ)2? .
+
+If we combine the normal prior density with this likelihood, it can be shown that the posterior density for μ also has the normal form with updated vari- ance and mean parameters τ2 1= ?1 τ2 0 +n σ2 ?−1 , μ1= τ2 1 ?μ0 τ2 0 +n¯ y σ2 ? .
+a. For the sleeping data collected in Chapter 6, n = 24 students were sampled and the mean sleeping time was ¯ y = 7.688. Assume that we know the sampling variance is given by σ2= 2.0. Use these values together with the prior mean and prior variance to compute the mean and variance of the posterior density of μ.
+
+```{r}
+y = 7.688
+n = 24
+sigma_square = 2.0
+tau_0 = 0.5
+mu_0 = 6
+tau_1 = sqrt((tau_0 ^ -2 + n * sigma_square ^ -1) ^ -1)
+mu_1 = tau_1 ^ 2 * (mu_0 * tau_0 ^ -2 + n * y * sigma_square ^ -1)
+tau_1
+mu_1
+```
+
+b. Using two applications of the curve function, plot the prior and posterior densities together using contrasting colors.
+
+```{r}
+curve(dnorm(x, mean=mu_0, sd=tau_0), from = 0, to = 12)
+curve(dnorm(x, mean=mu_1, sd=tau_1), add=TRUE, lty="dashed")
+```
+
+c. Use the qnorm function to construct a 90% posterior interval estimate of the mean sleeping time.
+
+```{r}
+qnorm(0.9, mean=mu_1, sd=tau_1)
+```
+
+d. Find the posterior probability that the mean amount of sleep exceeds 7 hours.
+
+```{r}
+1 - pnorm(7, mean=mu_1, sd=tau_1)
+```
+
+## 12.3 (Waiting until a hit in baseball). 
+
+In sports, fans are fascinated with the patterns of streaky behavior of athletes. In baseball, a batter wishes to get a “base hit”; otherwise he records an “out.” Suppose one records the number of outs between consecutive hits (the spacing) for a particular baseball player.
+
+For example, if the player begins the season with the outcomes H, O, O, H, H, O, O, O, O, H, O, H, H, then the spacings are given by 0, 2, 4, 1, 0 (one starts counting before the first outcome). One observes the following spacings for the player Ian Kinsler for the 2008 baseball season: 0 2 0 4 1 0 2 0 1 0 0 1 1 3 1 0 0 0 1 6 0 9 0 4 1 9 1 0 3 4 5 5 1 0 2 4 0 4 0 3 2 1 0 1 3 7 0 3 1 2 14 4 0 1 6 1 10 1 2 0 1 0 4 5 0 7 3 1 2 1 2 1 2 2 4 3 3 1 1 2 1 2 7 0 3 1 2 2 2 2 0 3 4 1 1 0 0 1 1 1 11 2 2 1 3 1 0 1 2 1 1 1 0 0 2 0 10 1 2 2 1 1 3 1 1 0 0 1 0 1 0 1 1 0 1 0 0 0 2 1 4 5 5 0 0 0 0 2 0 8 5 2 11 8 0 7 1 3 1 Let y denote the number of outs before the next base hit. A basic assumption is that y has a geometric(p) distribution with probability function f(y|p) = p(1−p)y, y = 0,1,2,...
+where p is the player’s hitting probability, If we assume independence in spacings, then the likelihood function of p is given by L(p) = ? y f(y|p) = pn(1−p)s, where n is the sample size and s =?y is the sum of the spacings.
+
+a. Compute the values of n and s for Kinsler’s data.
+
+```{r}
+baseball.hit = c(0,2,0,4,1,0,2,0,1,0,0,1,1,3,1,0,
+                 0,0,1,6,0,9,0,4,1,9,1,0,3,4,5,5,
+                 1,0,2,4,0,4,0,3,2,1,0,1,3,7,0,3,
+                 1,2,14,4,0,1,6,1,10,1,2,0,1,0,4,
+                 5,0,7,3,1,2,1,2,1,2,2,4,3,3,1,1,
+                 2,1,2,7,0,3,1,2,2,2,2,0,3,4,1,1,
+                 0,0,1,1,1,11,2,2,1,3,1,0,1,2,1,
+                 1,1,0,0,2,0,10,1,2,2,1,1,3,1,1,0,
+                 0,1,0,1,0,1,1,0,1,0,0,0,2,1,4,5,
+                 5,0,0,0,0,2,0,8,5,2,11,8,0,7,1,3,1)
+n = length(baseball.hit)
+s = sum(baseball.hit)
+n
+s
+```
+
+b. Use the curve function to graph the likelihood function for values of p between 0.2 and 0.5.
+
+```{r}
+curve(x^n*(1-x)^s, from=0.2, to=0.5)
+```
+
+c. Based on the graph of the likelihood, which value of the hitting probability p is “most likely” given the data?
+
+```{r}
+optimize(function(x) { x^n*(1-x)^s }, interval=c(0.2, 0.5), maximum=TRUE)$maximum
+```
