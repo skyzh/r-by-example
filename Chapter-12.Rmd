@@ -63,14 +63,14 @@ mu_1
 b. Using two applications of the curve function, plot the prior and posterior densities together using contrasting colors.
 
 ```{r}
-curve(dnorm(x, mean=mu_0, sd=tau_0), from = 0, to = 12)
+curve(dnorm(x, mean=mu_0, sd=tau_0), from = 0, to = 12, ylim=c(0, 2))
 curve(dnorm(x, mean=mu_1, sd=tau_1), add=TRUE, lty="dashed")
 ```
 
 c. Use the qnorm function to construct a 90% posterior interval estimate of the mean sleeping time.
 
 ```{r}
-qnorm(0.9, mean=mu_1, sd=tau_1)
+qnorm(c(0.05, 0.95), mean=mu_1, sd=tau_1)
 ```
 
 d. Find the posterior probability that the mean amount of sleep exceeds 7 hours.
@@ -115,4 +115,101 @@ c. Based on the graph of the likelihood, which value of the hitting probability 
 
 ```{r}
 optimize(function(x) { x^n*(1-x)^s }, interval=c(0.2, 0.5), maximum=TRUE)$maximum
+```
+
+## 12.4 (Waiting until a hit, continued). 
+
+Based on Ian Kinsler’s perfor- mance in previous seasons, a baseball fan has some prior beliefs about Kinsler’s hitting probability p. She believes that P(p < 0.300) = 0.5 and P(p < 0.350) = 0.90. This prior information can be matched to a beta density with shape parameters a = 44 and b = 102.
+
+g(p) = 1 B(44,102)p44−1(1−p)102−1, 0 < p < 1.
+
+If one multiplies this prior density with the likelihood function found in Exer- cise 12.3, the posterior density for p is given (up to a proportionality constant) by g(p|data) ∝ pn+44−1(1−p)s+102−1, 0 < p < 1, where n is the sample size and s =?y is the sum of the spacings. This is a beta density with shape parameters a = n + 44 and b = s + 102. (The values of n and s are found from the data in Exercise 12.3.) 
+
+a. Using the curve function, graph the posterior density for values of the hitting probability p between values 0.2 and 0.5.
+
+```{r}
+curve(x^(n+44-1)*(1-x)^(s+102-1), from=0.2, to=0.5)
+```
+
+b. Using the qbeta function, find the median of the posterior density of p.
+
+```{r}
+qbeta(0.5,n+44, s+102)
+```
+
+c. Using the qbeta function, construct a 95% Bayesian interval estimate for p
+```{r}
+qbeta(c(0.025, 1-0.025),n+44, s+102)
+```
+
+## 12.5 (Waiting until a hit, continued). 
+
+In Exercise 12.4, we saw that the posterior density for Ian Kinsler’s hitting probability is a beta density with shape parameters a = n+44 and b = s+102. (The values of n and s are found from the data in Exercise 12.3.) 
+
+a. Using the rbeta function, simulate 1000 values from the posterior density of p.
+
+```{r}
+result = rbeta(1000, n+44, s+102)
+```
+
+b. Use the hist function on the simulated sample to display the posterior density.
+
+```{r}
+hist(result, freq=FALSE)
+```
+
+c. Using the simulated draws, approximate the mean and standard deviation of the posterior density.
+
+```{r}
+mean(result)
+sd(result)
+```
+
+d. Using the simulated draws, construct a 95% Bayesian interval estimate.
+Compare the interval with the exact 95% interval estimate using the qbeta function.
+
+```{r}
+quantile(result, c(0.025, 1-0.025))
+qbeta(c(0.025, 1-0.025), n+44, s+102)
+```
+
+## 12.6 (Waiting until a hit, continued). 
+
+In Exercise 12.4, we saw that the posterior density for Ian Kinsler’s hitting probability is a beta density with shape parameters a = n+44 and b = s+102. (The values of n and s are found from the data in Exercise 12.3.) The function metrop.hasting.rw described in the chapter can be used to simulate a sample from the posterior density of the hitting probability p.
+
+The following function betalogpost will compute the logarithm of the beta density with shape parameters a and b.
+
+a. Use the function metrop.hasting.rw together with the function betalog- post to simulate from the posterior density using the Metropolis Hastings random walk algorithm. Use p = 0.2 as a starting value, take 1000 itera- tions, and use the scale constant C = 0.1. Construct a trace plot of the simulated values and find the acceptance rate of the algorithm. Compute the posterior mean of p from the simulated draws and compare the simu- lation estimate with the exact posterior mean (n+44)/(n+s+44+102).
+
+```{r}
+metrop.hasting.rw = function(logpost, current, C, iter, ...){ 
+  S = rep(0, iter); n.accept = 0 
+  for(j in 1:iter) { 
+    candidate = runif(1, min=current - C, max=current + C) 
+    prob = exp(logpost(candidate, ...) - logpost(current, ...)) 
+    accept = ifelse(runif(1) < prob, "yes", "no") 
+    current = ifelse(accept == "yes", candidate, current) 
+    S[j] = current; n.accept = n.accept + (accept == "yes") 
+  } 
+  list(S=S, accept.rate=n.accept / iter) 
+}
+betalogpost = function(p, a, b) dbeta(p, a, b, log=TRUE) 
+
+result = metrop.hasting.rw(betalogpost, 0.1, 0.2, 1000, n+44, s+102)
+plot(result$S, type="l")
+mean(result$S)
+(n+44)/(n+s+44+102)
+```
+
+b. Rerun the random walk algorithm using the alternative scale constant values C = 0.01 and C = 0.30. In each case, construct a trace plot and compute the acceptance rate of the algorithm. Of the three choices for the scale constant C, are any of the values unsuitable? Explain.
+
+```{r}
+C010 = result$accept.rate
+result = metrop.hasting.rw(betalogpost, 0.01, 0.2, 1000, n+44, s+102)
+plot(result$S, type="l")
+C001 = result$accept.rate
+result = metrop.hasting.rw(betalogpost, 0.30, 0.2, 1000, n+44, s+102)
+plot(result$S, type="l")
+C030 = result$accept.rate
+c(C010, C001, C030)
 ```
