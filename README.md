@@ -1,5 +1,5 @@
 # R-By-Example
 
-R by Example exercises.
+Solutions for the book "R by Example" exercises.
 
-*.Rmd files are exported from jupyter notebooks with jupytext plugin.
+You may run the code with R Studio, or view the result in pdf files.
