@@ -62,7 +62,7 @@ b. Use the dbinom function provided in R and compare your results using both met
 k = 0:12
 n = 12
 p = 1/3
-P_x1 = choose(n,k)*p^x*(1-p)^(n-k)
+P_x1 = choose(n,k)*p^k*(1-p)^(n-k)
 P_x2 = dbinom(k,n,p)
 plot(k, P_x1)
 plot(k, P_x2)
